@@ -7,7 +7,6 @@ node_modules/
 .expo/
 dist/
 web-build/
-expo-env.d.ts
 
 # Native
 *.orig.*
@@ -36,3 +35,5 @@ yarn-error.*
 *.tsbuildinfo
 
 app-example
+
+.env

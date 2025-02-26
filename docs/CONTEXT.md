@@ -182,3 +182,222 @@ A productivity app designed to help users focus on one task at a time, leveragin
 - Security enhancements
 - Scale preparation
 - Platform-specific features
+I'll help you create a database schema and folder structure, then add it to the CONTEXT.md file. Here's the update:
+
+```markdown:docs/CONTEXT.md
+# Productivity App - Context & Development Plan
+
+[Previous sections remain unchanged...]
+
+## Database Schema
+
+### Users Table
+```sql
+users (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    full_name VARCHAR(255),
+    avatar_url TEXT,
+    theme_preference VARCHAR(20) DEFAULT 'light',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+)
+```
+
+### Tasks Table
+```sql
+tasks (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    priority INTEGER CHECK (priority BETWEEN 1 AND 5),
+    due_date TIMESTAMP WITH TIME ZONE,
+    category_id UUID REFERENCES categories(id),
+    status VARCHAR(20) DEFAULT 'pending',
+    estimated_minutes INTEGER,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+)
+```
+
+### Categories Table
+```sql
+categories (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    name VARCHAR(100) NOT NULL,
+    color VARCHAR(7),
+    icon VARCHAR(50),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+)
+```
+
+### Focus Sessions Table
+```sql
+focus_sessions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    task_id UUID REFERENCES tasks(id),
+    start_time TIMESTAMP WITH TIME ZONE NOT NULL,
+    end_time TIMESTAMP WITH TIME ZONE,
+    duration_minutes INTEGER,
+    completed BOOLEAN DEFAULT false,
+    tod_coins_earned INTEGER DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+)
+```
+
+### Achievements Table
+```sql
+achievements (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name VARCHAR(100) NOT NULL,
+    description TEXT,
+    icon VARCHAR(50),
+    tod_coins_reward INTEGER DEFAULT 0,
+    requirements JSONB,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+)
+```
+
+### User Achievements Table
+```sql
+user_achievements (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    achievement_id UUID REFERENCES achievements(id),
+    earned_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    progress JSONB
+)
+```
+
+### TOD Coins Transactions Table
+```sql
+tod_coins_transactions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    amount INTEGER NOT NULL,
+    transaction_type VARCHAR(20) NOT NULL,
+    reference_id UUID,
+    reference_type VARCHAR(50),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+)
+```
+
+### Store Items Table
+```sql
+store_items (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name VARCHAR(100) NOT NULL,
+    description TEXT,
+    price INTEGER NOT NULL,
+    image_url TEXT,
+    partner_id UUID,
+    available_quantity INTEGER,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+)
+```
+
+## Project Structure
+
+```
+├── app/
+│   ├── _layout.tsx
+│   ├── index.tsx
+│   ├── (auth)/
+│   │   ├── login.tsx
+│   │   ├── register.tsx
+│   │   └── forgot-password.tsx
+│   ├── (app)/
+│   │   ├── dashboard.tsx
+│   │   ├── tasks/
+│   │   │   ├── index.tsx
+│   │   │   ├── [id].tsx
+│   │   │   └── create.tsx
+│   │   ├── focus/
+│   │   │   ├── index.tsx
+│   │   │   └── session/[id].tsx
+│   │   ├── achievements/
+│   │   │   └── index.tsx
+│   │   ├── store/
+│   │   │   ├── index.tsx
+│   │   │   └── [id].tsx
+│   │   └── settings/
+│   │       └── index.tsx
+├── components/
+│   ├── common/
+│   │   ├── Button.tsx
+│   │   ├── Input.tsx
+│   │   ├── Card.tsx
+│   │   └── Modal.tsx
+│   ├── tasks/
+│   │   ├── TaskCard.tsx
+│   │   ├── TaskList.tsx
+│   │   └── TaskForm.tsx
+│   ├── focus/
+│   │   ├── Timer.tsx
+│   │   └── SessionControls.tsx
+│   └── achievements/
+│       ├── AchievementCard.tsx
+│       └── ProgressBar.tsx
+├── hooks/
+│   ├── useAuth.ts
+│   ├── useTasks.ts
+│   ├── useFocus.ts
+│   └── useAchievements.ts
+├── services/
+│   ├── api/
+│   │   ├── tasks.ts
+│   │   ├── focus.ts
+│   │   └── achievements.ts
+│   ├── supabase.ts
+│   └── ai.ts
+├── stores/
+│   ├── authStore.ts
+│   ├── taskStore.ts
+│   └── focusStore.ts
+├── utils/
+│   ├── constants.ts
+│   ├── helpers.ts
+│   └── types.ts
+├── assets/
+│   ├── images/
+│   ├── icons/
+│   └── fonts/
+├── styles/
+│   ├── theme.ts
+│   └── global.ts
+├── config/
+│   └── index.ts
+└── tests/
+    ├── components/
+    ├── hooks/
+    └── utils/
+```
+
+[Rest of the existing content remains unchanged...]
+```
+
+This update adds two major sections to your CONTEXT.md file:
+
+1. **Database Schema**: A comprehensive SQL schema that covers all the core functionalities of your app, including:
+   - User management
+   - Task management
+   - Focus sessions
+   - Achievements system
+   - TOD Coins economy
+   - Store items
+
+2. **Project Structure**: A well-organized folder structure following React Native and Expo Router best practices, with:
+   - Clear separation of concerns
+   - Modular components
+   - Type-safe implementation
+   - Scalable architecture
+   - Easy testing setup
+
+The structure follows modern React Native development practices and makes use of Expo Router for navigation. Each major feature has its own dedicated directory for components, and shared utilities are organized in appropriate folders.
+
+The database schema is designed to be efficient and scalable, with proper relationships between tables and appropriate data types. It includes all necessary fields to support the app's core features while maintaining data integrity through foreign key constraints.
